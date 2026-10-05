@@ -1,0 +1,11 @@
+Kroko STT German Wyoming
+Copyright 2026 Kroko STT German Wyoming contributors.
+
+Original project source code is licensed under Apache-2.0.
+External dependencies and model weights retain their own licenses.
+See docs/licensing.md and docs/dependency-licenses.md.
+
+Acknowledgements: Kroko / Banafo; k2-fsa sherpa-onnx;
+Wyoming protocol and Home Assistant contributors.
+These acknowledgements imply no affiliation or endorsement.
+No model weights are included.

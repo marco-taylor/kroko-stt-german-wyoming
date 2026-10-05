@@ -1,0 +1,12 @@
+# Explicit build-context allowlist: no models, audio, results or local caches.
+**
+!Dockerfile
+!Cargo.toml
+!Cargo.lock
+!LICENSE
+!NOTICE
+!src/
+!src/server/
+!src/server/**
+!src/bin/
+!src/bin/wyoming-probe.rs

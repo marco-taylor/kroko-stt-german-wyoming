@@ -1,0 +1,43 @@
+# Model weights and downloaded archives, anywhere
+/models/
+*.onnx
+*.data
+*.tar.gz
+*.tar.bz2
+*.tgz
+*.zip
+# Local build caches and historical development material
+/target/
+/.cargo/
+/vendor/
+/results/
+/research/
+/samples/
+/examples/
+/docker/
+/Dockerfile.benchmark
+/src/main.rs
+/scripts/*
+!/scripts/build-image.sh
+!/scripts/run-local.sh
+# Local audio, outputs, configuration and editor files
+*.wav
+*.pcm
+*.log
+*.tmp
+*.swp
+*.bak
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+.DS_Store
+*.flac
+*.mp3
+*.ogg
+*.m4a
+*.tar
+*.tar.xz
+*.7z
+*.onnx_data

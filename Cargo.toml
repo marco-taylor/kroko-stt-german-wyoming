@@ -1,0 +1,25 @@
+[package]
+name = "kroko-stt-german-wyoming"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "German streaming speech-to-text with Kroko, sherpa-onnx, Rust and Wyoming"
+autobins = false
+autoexamples = false
+[dependencies]
+sherpa-onnx = "=1.13.8"
+hound = "3.5.1"
+serde_json = "1"
+libc = "0.2"
+sha2 = "=0.10.9"
+
+[[bin]]
+name = "kroko-wyoming"
+path = "src/server/main.rs"
+[[bin]]
+name = "wyoming-probe"
+path = "src/bin/wyoming-probe.rs"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
