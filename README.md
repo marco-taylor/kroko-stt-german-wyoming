@@ -1,143 +1,194 @@
-<img src="icons/kroko-stt-german-wyoming.png" alt="Kroko STT German Wyoming icon" width="160" height="160">
+<img src="icons/kroko-stt-german-wyoming.png" alt="Kroko STT German Wyoming Icon" width="160" height="160">
 
 # Kroko STT German Wyoming
 
-German streaming speech-to-text with Kroko, sherpa-onnx, Rust and Wyoming.
-Built for Home Assistant and efficient CPU-only operation.
+Deutsche Streaming-Spracherkennung mit Kroko, sherpa-onnx, Rust und Wyoming.
+Entwickelt für Home Assistant und einen effizienten CPU-Betrieb.
 
-This project runs German online speech recognition locally on linux/amd64,
-including efficient systems such as the Intel N100. Audio chunks are decoded
-as they arrive using Rust and sherpa-onnx's native OnlineRecognizer. No Python
-service, GPU or second inference runtime is required. Inference needs no network.
-The classic model and the existing Wyoming service have been tested with Home Assistant.
+Dieses Projekt ermöglicht lokale deutsche Online-Spracherkennung auf linux/amd64,
+auch auf sparsamen Systemen wie dem Intel N100. Audioblöcke werden direkt beim
+Eintreffen mit Rust und dem nativen OnlineRecognizer von sherpa-onnx verarbeitet.
+Ein Python-Dienst, eine GPU oder eine zweite Inferenz-Laufzeit werden nicht benötigt.
+Für die Spracherkennung selbst ist keine Netzwerkverbindung erforderlich.
+Das Classic-Modell und der Wyoming-Dienst wurden mit Home Assistant getestet.
+
+**Unterstützte Sprache:** ausschließlich Deutsch (`de` / `de-DE`).
 
 ```text
-Microphone / Home Assistant
+Mikrofon / Home Assistant
         ↓
 Wyoming
         ↓
-Rust server
+Rust-Server
         ↓
 sherpa-onnx OnlineRecognizer
         ↓
-Kroko streaming model
+Kroko Streaming-Modell
 ```
 
-## Models
+## Modelle
 
-Model weights are external and are never included in this repository or image.
-Set `KROKO_MODEL` to one of these profiles; the default is `classic`:
+Die Modellgewichte werden extern bereitgestellt und sind weder Bestandteil dieses
+Repositories noch des Images. Über `KROKO_MODEL` wird eines der folgenden Profile
+ausgewählt; Standard ist `classic`:
 
-| Selection | Directory inside container | Model |
+| Auswahl | Verzeichnis im Container | Modell |
 | --- | --- | --- |
 | `classic` | `/models/classic/` | sherpa-onnx-streaming-zipformer-de-kroko-2025-08-06 |
 | `community-64` | `/models/community-64/` | Kroko-DE-Community-64-L-Streaming-001 |
 | `community-128` | `/models/community-128/` | Kroko-DE-Community-128-L-Streaming-001 |
 
-Each directory must provide these validated runtime artifacts:
-`encoder.onnx`, `decoder.onnx`, `joiner.onnx`, `tokens.txt`.
-Only one recognizer/model is loaded. Startup verifies every selected file against
-pinned SHA256 values in [src/server/models.rs](src/server/models.rs).
-Missing files, wrong hashes and unknown selections cause a clear startup error.
-Arbitrary newer exports are not accepted.
+Jedes Verzeichnis muss die geprüften Laufzeitdateien
+`encoder.onnx`, `decoder.onnx`, `joiner.onnx` und `tokens.txt` enthalten.
+Es wird immer nur ein Recognizer bzw. Modell geladen. Beim Start werden alle
+Dateien des ausgewählten Profils anhand der in
+[src/server/models.rs](src/server/models.rs) hinterlegten SHA256-Werte geprüft.
+Fehlende Dateien, falsche Prüfsummen oder unbekannte Modellnamen führen zu einer
+klaren Fehlermeldung und zum Abbruch. Beliebige neuere Exporte werden nicht
+automatisch akzeptiert.
 
-Classic export revision: `887db3d083240198c2d2b99fb66cfcfe6948ced8`.
-Community source revision: `d45212aeb212dd66083dd22710c9954f40ff8cc1`.
-See [docs/models.md](docs/models.md) for sources and extraction requirements.
+Classic-Export-Revision: `887db3d083240198c2d2b99fb66cfcfe6948ced8`.
+Community-Quellrevision: `d45212aeb212dd66083dd22710c9954f40ff8cc1`.
+Quellen und Hinweise zur Bereitstellung der Modelle stehen in
+[docs/models.md](docs/models.md).
 
-To switch models, change the environment variable and recreate the container.
-`docker restart` alone does not change its environment. The Wyoming name remains
-`kroko`, so selecting another model does not require three separate integrations.
+Zum Wechseln des Modells muss die Umgebungsvariable geändert und der Container
+neu erstellt werden. Ein `docker restart` allein ändert die Umgebung nicht.
+Der Wyoming-Name bleibt `kroko`, sodass für die Modellprofile keine getrennten
+Home-Assistant-Integrationen erforderlich sind.
 
-## Local Docker build and run
+## Lokaler Docker-Build und Start
 
-The Dockerfile pins Rust 1.90.0, sherpa-onnx 1.13.8, the native archive checksum
-and base image digests. Cargo dependencies are locked. Building requires internet
-access; runtime inference does not. The final distroless image runs as UID 65532,
-contains no models, audio, Python or build tools, and uses CPU only.
-This is a local build path: binary/image redistribution requires the license
-review described in [docs/licensing.md](docs/licensing.md).
+Das Dockerfile verwendet festgelegte Versionen bzw. Prüfsummen für Rust 1.90.0,
+sherpa-onnx 1.13.8, das native Archiv und die Basis-Images. Cargo-Abhängigkeiten
+sind gesperrt. Für den Build ist Internetzugriff erforderlich, für die eigentliche
+Spracherkennung zur Laufzeit nicht. Das finale Distroless-Image läuft als UID
+65532, enthält keine Modelle, Audiodateien, Python-Laufzeit oder Build-Werkzeuge
+und nutzt ausschließlich die CPU.
+
+Dieser Weg ist derzeit für lokale Builds vorgesehen. Für die öffentliche
+Weiterverteilung eines fertigen Binaries bzw. Images ist die Lizenzprüfung aus
+[docs/licensing.md](docs/licensing.md) zu beachten.
 
 ```sh
 ./scripts/build-image.sh
 MODELS_DIR=/absolute/path/to/your/models ./scripts/run-local.sh
 ```
 
-The helper defaults to loopback port 10321 and refuses to replace an existing
-container. For a remote Home Assistant, choose a free port and a reachable bind
-address explicitly, for example `BIND_ADDRESS=0.0.0.0 HOST_PORT=10321`.
-Restrict exposure to your trusted LAN: Wyoming TCP has no authentication or TLS.
-Models are mounted read-only; no Docker socket or privileged execution is used.
+Das Hilfsskript verwendet standardmäßig den Loopback-Port 10321 und ersetzt
+keinen bereits vorhandenen Container. Soll Home Assistant von einem anderen
+Rechner zugreifen, müssen ein freier Port und eine erreichbare Bind-Adresse
+angegeben werden, zum Beispiel `BIND_ADDRESS=0.0.0.0 HOST_PORT=10321`.
 
-Add **Wyoming Protocol** in Home Assistant using the Docker host's reachable
-address and chosen host port. Select `kroko` as the STT provider in your Assist
-pipeline. This project never configures Home Assistant automatically.
+Wyoming TCP bietet selbst keine Authentifizierung und kein TLS. Der Dienst sollte
+daher nur im vertrauenswürdigen lokalen Netzwerk erreichbar sein. Modelle werden
+schreibgeschützt eingebunden; Docker-Socket und privilegierte Ausführung werden
+nicht benötigt.
 
-| Environment | Container default | Meaning |
+In Home Assistant die Integration **Wyoming Protocol** mit der erreichbaren
+Adresse des Docker-Hosts und dem gewählten Port hinzufügen. Anschließend `kroko`
+als STT-Anbieter in der Assist-Pipeline auswählen. Dieses Projekt verändert die
+Home-Assistant-Konfiguration nicht automatisch.
+
+| Umgebungsvariable | Container-Standard | Bedeutung |
 | --- | --- | --- |
-| `KROKO_MODEL` | `classic` | Selected profile |
-| `MODEL_DIR` | `/models` | Parent of the three model directories |
-| `HOST` | `0.0.0.0` | Container listener address |
-| `PORT` | `10321` | Wyoming TCP port |
-| `NUM_THREADS` | `1` | Inference threads, allowed 1–4 |
-| `LANGUAGE` | `de` | `de` or `de-DE`; models are monolingual German |
+| `KROKO_MODEL` | `classic` | Ausgewähltes Modellprofil |
+| `MODEL_DIR` | `/models` | Übergeordnetes Verzeichnis der drei Modellordner |
+| `HOST` | `0.0.0.0` | Listener-Adresse im Container |
+| `PORT` | `10321` | Wyoming-TCP-Port |
+| `NUM_THREADS` | `1` | Inferenz-Threads, zulässig sind 1–4 |
+| `LANGUAGE` | `de` | `de` oder `de-DE`; die Modelle sind ausschließlich deutschsprachig |
 | `LOG_LEVEL` | `info` | `error`, `warn`, `info`, `debug` |
-| `TZ` | `Europe/Berlin` | Container timezone |
+| `TZ` | `Europe/Berlin` | Zeitzone des Containers |
 
-Direct executable defaults differ: `MODEL_DIR=models`, `HOST=127.0.0.1`,
-`PORT=10300`. Native development needs the matching sherpa library directory:
-`SHERPA_ONNX_LIB_DIR=/absolute/path/to/native/lib cargo test --locked`, followed
-by `cargo build --release --locked --bins`.
+Die Standardwerte bei direkter Ausführung unterscheiden sich:
+`MODEL_DIR=models`, `HOST=127.0.0.1`, `PORT=10300`.
+Für die native Entwicklung wird das passende sherpa-Bibliotheksverzeichnis benötigt:
 
-## Protocol, streaming and privacy
+```sh
+SHERPA_ONNX_LIB_DIR=/absolute/path/to/native/lib cargo test --locked
+cargo build --release --locked --bins
+```
 
-The server answers `describe` with `info`, accepts `transcribe`, `audio-start`,
-multiple `audio-chunk` events, then `audio-stop`, and returns `transcript`.
-Audio must be 16 kHz, mono, signed 16-bit little-endian PCM. No resampler is included.
-TCP fragmentation is handled independently of event boundaries.
-Audio is processed incrementally and discarded; the service does not record it.
-There is no internal VAD: the client must end the request with `audio-stop`.
-One active inference is serialized; connections are bounded. Graceful shutdown
-may wait up to the connection inactivity timeout before workers finish.
+## Protokoll, Streaming und Datenschutz
 
-Partial results are internal diagnostics, not proprietary Home Assistant events.
-At `info`, final transcripts appear in logs; `debug` also logs changing partials.
-Use `LOG_LEVEL=warn` to avoid normal transcript logs, and consider Docker log
-retention when handling private speech. Logs are not audio recordings.
+Der Server beantwortet `describe` mit `info`, akzeptiert `transcribe`,
+`audio-start`, mehrere `audio-chunk`-Ereignisse und anschließend
+`audio-stop`. Danach wird `transcript` zurückgegeben.
 
-The included `wyoming-probe` is a healthcheck and optional local WAV smoke client:
+Audio muss als 16 kHz, Mono, vorzeichenbehaftetes 16-Bit-Little-Endian-PCM
+vorliegen. Ein Resampler ist nicht enthalten. TCP-Fragmentierung wird unabhängig
+von den Ereignisgrenzen verarbeitet. Audio wird fortlaufend verarbeitet und
+anschließend verworfen; der Dienst zeichnet keine Audiodaten auf.
+
+Es gibt keine interne VAD. Der Client muss die Anfrage mit `audio-stop`
+abschließen. Eine aktive Inferenz wird serialisiert und die Zahl der Verbindungen
+ist begrenzt. Beim sauberen Beenden kann der Server bis zum Verbindungs-Timeout
+warten, bevor Worker beendet werden.
+
+Teilergebnisse dienen internen Diagnosezwecken und sind keine proprietären
+Home-Assistant-Ereignisse. Bei `info` werden finale Transkripte protokolliert;
+`debug` protokolliert zusätzlich geänderte Teilergebnisse. Mit
+`LOG_LEVEL=warn` lassen sich normale Transkript-Logs vermeiden. Bei privaten
+Sprachdaten sollte zusätzlich die Docker-Log-Aufbewahrung berücksichtigt werden.
+Die Logs enthalten keine Audioaufzeichnungen.
+
+Der mitgelieferte `wyoming-probe` dient als Healthcheck und optional als lokaler
+WAV-Smoke-Test:
 
 ```sh
 docker exec kroko-stt-german-wyoming-local /usr/local/bin/wyoming-probe
-# With a separately read-only-mounted 16 kHz mono PCM16 WAV:
+# Mit einer separat schreibgeschützt eingebundenen 16-kHz-Mono-PCM16-WAV:
 # wyoming-probe --smoke 127.0.0.1:10321 /test/audio.wav
 ```
 
-## Reference performance
+## Referenzleistung
 
-These are our own Intel N100 control measurements with one inference thread,
-not guaranteed performance. Hardware, audio, threading and build configuration
-change the results. RTF is inference time divided by audio duration.
+Die folgenden Werte stammen aus eigenen Kontrollmessungen auf einem Intel N100
+mit einem Inferenz-Thread und sind keine Leistungsgarantie. Hardware, Audio,
+Threading und Build-Konfiguration beeinflussen die Ergebnisse. RTF bezeichnet
+das Verhältnis von Inferenzzeit zu Audiodauer.
 
-| Model | RTF | RSS after startup |
+| Modell | RTF | RSS nach dem Start |
 | --- | --- | --- |
 | classic | ~0.06–0.07 | ~131–133 MiB |
 | community-64 | ~0.082 | ~246 MiB |
 | community-128 | ~0.122 | ~245 MiB |
 
-Classic is currently our recommended N100 variant. These short control runs do
-not establish superiority on unrestricted speech or guarantee command accuracy.
+Für den Intel N100 ist `classic` derzeit unsere empfohlene Variante. Die kurzen
+Kontrolltests belegen keine generelle Überlegenheit bei beliebiger Spracheingabe
+und garantieren keine fehlerfreie Befehlserkennung.
 
-## Licensing and acknowledgements
+## Lizenzierung
 
-Our original source code is Apache-2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE).
-Dependency and model licenses are separate; see [docs/licensing.md](docs/licensing.md).
-In particular, classic weights are **not claimed to be freely redistributable**.
-Community model notices also require review of the exact applicable terms.
-No model weights may be inferred to inherit this project's Apache license.
+Der von diesem Projekt selbst entwickelte Quellcode steht unter Apache-2.0;
+siehe [LICENSE](LICENSE) und [NOTICE](NOTICE).
 
-Thanks to [Kroko / Banafo](https://github.com/Banafo),
-[sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx),
-[Wyoming](https://github.com/rhasspy/wyoming) and
-[Home Assistant](https://www.home-assistant.io/).
-These credits imply no official partnership, support or endorsement.
+Abhängigkeiten und Modelle besitzen eigene, davon unabhängige Lizenzbedingungen;
+siehe [docs/licensing.md](docs/licensing.md). Insbesondere wird **nicht behauptet,
+dass die Classic-Modellgewichte frei weiterverbreitet werden dürfen**. Auch bei
+den Community-Modellen müssen die jeweils tatsächlich anwendbaren Bedingungen
+beachtet werden. Modellgewichte übernehmen nicht automatisch die Apache-2.0-Lizenz
+dieses Projekts.
+
+## Danksagungen
+
+Dieses Projekt baut auf der Arbeit mehrerer Open-Source-Projekte und Communities auf:
+
+- **Kroko / Banafo** – für die deutschen Kroko-Streaming-Spracherkennungsmodelle.
+- **sherpa-onnx / k2-fsa** – für die effiziente Streaming-ASR-Laufzeit und den
+  OnlineRecognizer.
+- **Wyoming** – für das leichtgewichtige Sprachassistenten-Protokoll zur
+  Integration mit Home Assistant.
+- **Home Assistant** – für die Open-Source-Heimautomatisierungsplattform und das
+  Assist-Ökosystem.
+
+Offizielle Projekte:
+[Kroko / Banafo](https://github.com/Banafo) ·
+[sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) ·
+[Wyoming](https://github.com/OHF-Voice/wyoming) ·
+[Home Assistant](https://www.home-assistant.io/)
+
+Kroko/Banafo, sherpa-onnx, Wyoming und Home Assistant sind unabhängige Projekte.
+Ihre Namen und Marken gehören den jeweiligen Rechteinhabern. Die Danksagungen
+begründen keine Partnerschaft, Unterstützung oder Empfehlung durch diese Projekte.
