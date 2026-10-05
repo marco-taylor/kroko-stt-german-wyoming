@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="icons/kroko-stt-german-wyoming.png" alt="Kroko STT German Wyoming icon" width="160" height="160">
-</p>
+<img src="icons/kroko-stt-german-wyoming.png" alt="Kroko STT German Wyoming icon" width="160" height="160">
 
 # Kroko STT German Wyoming
 
