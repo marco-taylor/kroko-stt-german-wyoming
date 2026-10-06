@@ -39,7 +39,7 @@ COPY --from=build /opt/distribution-licenses/ /usr/share/licenses/kroko/dependen
 COPY --from=build /usr/share/zoneinfo/Europe/Berlin /usr/share/zoneinfo/Europe/Berlin
 COPY LICENSE NOTICE /usr/share/licenses/kroko/
 COPY docs/licensing.md docs/dependency-licenses.md /usr/share/licenses/kroko/
-USER 65532:65532
+USER 99:100
 ENV LD_LIBRARY_PATH=/usr/local/lib/kroko KROKO_MODEL=classic MODEL_DIR=/models HOST=0.0.0.0 PORT=10321 NUM_THREADS=1 LANGUAGE=de LOG_LEVEL=info TZ=Europe/Berlin
 EXPOSE 10321
 HEALTHCHECK --interval=15s --timeout=5s --start-period=30s --retries=3 CMD ["/usr/local/bin/wyoming-probe"]

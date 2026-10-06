@@ -8,7 +8,7 @@ check, not a new benchmark or a publication/license approval.
 | --- | --- |
 | Rust | 1.90.0, cargo test --locked: 5 passed; release build --locked successful |
 | Native runtime | sherpa-onnx 1.13.8 / ONNX Runtime 1.28.2 |
-| Docker | linux/amd64; ~58.21 MiB image; UID 65532; no model weights |
+| Docker | linux/amd64; ~58.21 MiB image; non-root (historical build); no model weights |
 | Isolation | Separate container, network=none, no host port, read-only model/audio mounts |
 | Describe | info response; ASR and model name kroko; de/de-DE |
 | Model loading | Once; 3.074 seconds excluding preceding hash verification; RSS 132.38 MiB |

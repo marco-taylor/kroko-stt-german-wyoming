@@ -56,7 +56,7 @@ for file in encoder.onnx decoder.onnx joiner.onnx tokens.txt; do
   rm -- "$file.download"
 done
 chmod 755 "$model_dir" "$(dirname "$model_dir")"
-echo "Classic bereit: vier SHA256-Prüfungen erfolgreich; Modelle lesbar für UID 65532."
+echo "Classic bereit: vier SHA256-Prüfungen erfolgreich; Modelle lesbar für UID 99 / GID 100."
 )
 ```
 
@@ -69,10 +69,10 @@ Versuch nur die selbst angelegten unvollständigen .download-Dateien prüfen,
 bevor du den Block erneut ausführst; vorhandene Modelle nicht blind löschen. Die Befehle
 koennen keine Lizenzrechte erteilen. Sie richten keine automatische
 Weiterverteilung ein. Falls vorhandene Elternordner den Zugriff verhindern,
-deren Durchsuchbarkeit für UID/GID 65532 gezielt prüfen; weder pauschal
+deren Durchsuchbarkeit für UID 99 / GID 100 gezielt prüfen; weder pauschal
 Appdata-Rechte ändern noch chmod 777 verwenden. Der Block setzt ausschließlich
 die beiden eingebundenen Modellordner auf 755 und die vier Dateien auf 644.
-Ein chown auf UID 65532 ist dafür nicht nötig.
+Ein chown auf UID 99 / GID 100 ist dafür nicht nötig.
 
 Erwartete Struktur:
 

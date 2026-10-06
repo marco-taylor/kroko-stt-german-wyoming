@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Container version="2">
-  <Name>Kroko STT German Wyoming</Name>
+  <Name>kroko-stt-german-wyoming</Name>
   <Repository>ghcr.io/marco-taylor/kroko-stt-german-wyoming:latest</Repository>
   <Registry>https://github.com/marco-taylor/kroko-stt-german-wyoming/pkgs/container/kroko-stt-german-wyoming</Registry>
   <Network>bridge</Network>
@@ -20,8 +20,8 @@ Vor Start einen freien Hostport waehlen. Keine Weboberflaeche, GPU oder Audioauf
   <ExtraSearchTerms>kroko banafo stt speech-to-text deutsch german streaming home assistant wyoming rust sherpa-onnx</ExtraSearchTerms>
   <WebUI/>
   <Icon>https://raw.githubusercontent.com/marco-taylor/kroko-stt-german-wyoming/main/icons/kroko-stt-german-wyoming.png</Icon>
-  <ExtraParams>--user=65532:65532 --read-only --cap-drop=ALL --security-opt=no-new-privileges --restart=unless-stopped</ExtraParams>
-  <Requires>linux/amd64. Vor dem ersten Start das ausgewaehlte Modell anhand der ReadMe extern vorbereiten und SHA256 pruefen. Modellordner muessen fuer UID/GID 65532 lesbar und durchsuchbar sein. Keine Modellgewichte im Image. Hostport darf keinen bestehenden Dienst verdraengen.</Requires>
+  <ExtraParams>--user=99:100 --read-only --cap-drop=ALL --security-opt=no-new-privileges --restart=unless-stopped</ExtraParams>
+  <Requires>linux/amd64. Vor dem ersten Start das ausgewaehlte Modell anhand der ReadMe extern vorbereiten und SHA256 pruefen. Modellordner muessen fuer UID 99 / GID 100 lesbar und durchsuchbar sein. Keine Modellgewichte im Image. Hostport darf keinen bestehenden Dienst verdraengen.</Requires>
   <Config Name="Wyoming-STT-Port" Target="10321" Default="10321" Mode="tcp" Description="Freier Host-TCP-Port fuer Home Assistant. Standard 10321; interner Container-Port bleibt 10321. Bestehende Dienste nicht ersetzen." Type="Port" Display="always" Required="true" Mask="false">10321</Config>
   <Config Name="Kroko-Modelle (vorher vorbereiten)" Target="/models" Default="/mnt/user/appdata/kroko-stt-german-wyoming/models" Mode="ro" Description="Persistenter uebergeordneter Modellordner, read-only. Fuer classic werden classic/encoder.onnx, classic/decoder.onnx, classic/joiner.onnx und classic/tokens.txt benoetigt. Vor Apply die Modellanleitung unter ReadMe befolgen. Kein automatischer Download." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/kroko-stt-german-wyoming/models</Config>
   <Config Name="Kroko-Modell" Target="KROKO_MODEL" Default="classic|community-64|community-128" Mode="" Description="classic ist Standard. Alternativen nur bei manuell vorbereiteten, hashgeprueften Dateien in community-64/ oder community-128/. Nur die Auswahl wird geladen. Wechsel erfordert Neuerstellen, nicht nur docker restart." Type="Variable" Display="always" Required="true" Mask="false">classic</Config>

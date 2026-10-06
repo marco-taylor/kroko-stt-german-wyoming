@@ -55,7 +55,7 @@ Quellen und Hinweise zur Bereitstellung der Modelle stehen in
 Für eine frische Unraid-Installation ist `classic` das empfohlene Standardmodell.
 Die Modellanleitung enthält einen vollständigen Copy-&-Paste-Befehlsblock für
 den manuellen Download der vier Dateien aus der exakt gepinnten Originalquelle,
-ihre SHA256-Prüfung und Leserechte für UID 65532. Diesen Schritt **vor dem ersten
+ihre SHA256-Prüfung und Leserechte für UID 99 / GID 100. Diesen Schritt **vor dem ersten
 Containerstart** ausführen; weder Image noch Server laden Modelle automatisch.
 Nutzer müssen die Bedingungen der Originalquelle prüfen und akzeptieren.
 Bei unklaren Nutzungsrechten ist eine Klärung mit dem Rechteinhaber erforderlich;
@@ -77,8 +77,16 @@ Das Dockerfile verwendet festgelegte Versionen bzw. Prüfsummen für Rust 1.90.0
 sherpa-onnx 1.13.8, dessen Quellarchiv und die Basis-Images. Cargo-Abhängigkeiten
 sind gesperrt. Für den Build ist Internetzugriff erforderlich, für die eigentliche
 Spracherkennung zur Laufzeit nicht. Das finale Distroless-Image läuft als UID
-65532, enthält keine Modelle, Audiodateien, Python-Laufzeit oder Build-Werkzeuge
+99 / GID 100 (Unraid nobody:users), enthält keine Modelle, Audiodateien, Python-Laufzeit oder Build-Werkzeuge
 und nutzt ausschließlich die CPU.
+
+Unter Unraid entspricht UID 99 / GID 100 `nobody:users`. Modelle bleiben
+read-only eingebunden; lesbare Dateien (644) und durchsuchbare Verzeichnisse
+(755) genügen, ohne deren Eigentümer zu ändern. Bei einer bestehenden
+CA-Installation muss die Benutzeroption in Extra Parameters ebenfalls auf
+`--user=99:100` geändert und der Container mit dem passenden Image neu erstellt
+werden. Ein bloßer Neustart übernimmt weder ein neues Image noch geänderte
+Containerparameter.
 
 Dieser Weg ist derzeit für lokale Builds vorgesehen. Für die öffentliche
 Weiterverteilung eines fertigen Binaries bzw. Images ist die Lizenzprüfung aus
@@ -222,3 +230,10 @@ Offizielle Projekte:
 Kroko/Banafo, sherpa-onnx, Wyoming und Home Assistant sind unabhängige Projekte.
 Ihre Namen und Marken gehören den jeweiligen Rechteinhabern. Die Danksagungen
 begründen keine Partnerschaft, Unterstützung oder Empfehlung durch diese Projekte.
+
+### Technischer Unraid-Containername
+
+Eine frische Installation über Community Applications verwendet exakt den
+Containernamen `kroko-stt-german-wyoming`. Das Image-Repository bleibt
+`ghcr.io/marco-taylor/kroko-stt-german-wyoming`. Eine bestehende Installation
+wird durch eine Template-Aktualisierung nicht automatisch umbenannt.
