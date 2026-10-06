@@ -20,6 +20,7 @@
 /scripts/*
 !/scripts/build-image.sh
 !/scripts/run-local.sh
+!/scripts/collect-licenses.sh
 # Local audio, outputs, configuration and editor files
 *.wav
 *.pcm

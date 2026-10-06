@@ -1,6 +1,7 @@
 # Locked Rust dependency licenses
 
-Declared package metadata from exact cached crate versions in Cargo.lock;\nuncached target-specific packages checked against the checksum-verified official crates.io source archives.
+Declared package metadata from exact cached crate versions in Cargo.lock;
+uncached target-specific packages checked against the checksum-verified official crates.io source archives.
 Includes build-only dependencies; this is an inventory, not a complete binary license clearance.
 Versioned source links contain original notices. Recheck when updating the lockfile.
 
@@ -153,3 +154,87 @@ Versioned source links contain original notices. Recheck when updating the lockf
 | zstd | 0.13.3 | MIT | [crate source](https://docs.rs/crate/zstd/0.13.3/source/) |
 | zstd-safe | 7.3.0 | BSD-3-Clause | [crate source](https://docs.rs/crate/zstd-safe/7.3.0/source/) |
 | zstd-sys | 2.1.0+zstd.1.5.7 | BSD-3-Clause | [crate source](https://docs.rs/crate/zstd-sys/2.1.0+zstd.1.5.7/source/) |
+
+## Native runtime build (v0.1.0 candidate)
+
+The Dockerfile builds the official sherpa-onnx source with TTS, speaker
+diarization, GPU support, Python, demonstration binaries, PortAudio and
+WebSocket support disabled. Rust uses the upstream `shared` feature.
+This is an ASR-oriented build, not a patched online-only fork: the generic
+C API retains other ASR/audio functions. Their dependencies are included below
+even where the Kroko greedy-search configuration does not call them.
+
+| Component | Exact source/version | License | Runtime inclusion |
+| --- | --- | --- | --- |
+| sherpa-onnx | [1.13.8](https://github.com/k2-fsa/sherpa-onnx/tree/v1.13.8) | Apache-2.0 | Shared C API; core statically included in that library |
+| ONNX Runtime | [1.28.2, commit 33ca9628233dc8f002435e868d4c2e9f82766ca1](https://github.com/microsoft/onnxruntime/tree/33ca9628233dc8f002435e868d4c2e9f82766ca1) | MIT plus bundled component licenses | CPU shared library; no GPU provider |
+| kaldi-native-fbank | [1.22.3](https://github.com/csukuangfj/kaldi-native-fbank/tree/v1.22.3) | Apache-2.0 | Static feature-extractor code within the C API |
+| KissFFT | [febd4caeed32e33ad8b2e0bb5ea77542c40f18ec](https://github.com/mborgerding/kissfft/tree/febd4caeed32e33ad8b2e0bb5ea77542c40f18ec) | BSD-3-Clause | Static FFT code within the C API |
+| kaldi-decoder | [0.3.0](https://github.com/k2-fsa/kaldi-decoder/tree/v0.3.0) | Apache-2.0 | Static generic decoder code within the C API |
+| kaldifst | [1.8.0](https://github.com/k2-fsa/kaldifst/tree/v1.8.0) | Apache-2.0 | Static FST adapters within the C API |
+| OpenFst | [1.8.5-2026-07-09](https://github.com/csukuangfj/openfst/tree/v1.8.5-2026-07-09) | Apache-2.0 | Static FST code within the C API |
+| simple-sentencepiece | [0.7](https://github.com/pkufool/simple-sentencepiece/tree/v0.7) | Apache-2.0 | Static tokenization code within the C API |
+| Darts-clone helper | [Header bundled in simple-sentencepiece 0.7](https://github.com/pkufool/simple-sentencepiece/blob/v0.7/ssentencepiece/csrc/darts.h) | BSD-2-Clause | Header implementation; its original notice is extracted into the image |
+| ThreadPool helper | [Header bundled in simple-sentencepiece 0.7](https://github.com/pkufool/simple-sentencepiece/blob/v0.7/ssentencepiece/csrc/threadpool.h) | zlib-style license | Header implementation; its original notice is extracted into the image |
+| Eigen | [5.0.1 source](https://gitlab.com/libeigen/eigen/-/tree/5.0.1) | MPL-2.0 for the included Dense/Core headers; per-file notices apply | Header code within generic decoder routines; GPL support modules are not compiler inputs |
+| nlohmann/json | [3.12.0](https://github.com/nlohmann/json/tree/v3.12.0) | MIT | Header code within sherpa |
+| Rust standard library | [1.90.0](https://github.com/rust-lang/rust/tree/1.90.0) | Apache-2.0 OR MIT, plus component notices/exceptions | Static Rust library/runtime code within the executables |
+
+The exact ONNX Runtime archive is the CPU release referenced and checksum-pinned
+by sherpa's own CMake configuration (SHA256
+`c4f8994d56191d9d2c92a961b39fe790459f2c5d155f912b239506ea31359534`).
+Its `GIT_COMMIT_ID` matches Microsoft's version tag. The publisher's
+[pinned build recipe](https://github.com/csukuangfj/onnxruntime-libs/blob/5cc3d2e84d9eade2562cf29a93fa3a520a75ca57/.github/workflows/linux-shared-217.yaml)
+changes shared-library versioning/SONAME, not the inference architecture.
+The package's complete ThirdPartyNotices is retained. It covers optional upstream
+components as well as those in this CPU binary; listing is not proof of linkage.
+
+Important ORT contributors include ONNX (Apache-2.0), Protobuf (BSD-3-Clause),
+Abseil (Apache-2.0), RE2 (BSD-3-Clause), FlatBuffers (Apache-2.0), MLAS (MIT),
+cpuinfo (BSD-2-Clause), nlohmann/json (MIT), Microsoft GSL (MIT), and Eigen
+(MPL-2.0 with per-file exceptions). Exact source pins and hashes are in
+[ORT's dependency manifest](https://github.com/microsoft/onnxruntime/blob/v1.28.2/cmake/deps.txt).
+The covered Eigen source used by ORT is available without charge at
+[commit 1d8b82b0740839c0de7f1242a3585e3390ff5f33](https://github.com/eigen-mirror/eigen/tree/1d8b82b0740839c0de7f1242a3585e3390ff5f33).
+The native Eigen 5.0.1 source above is also unmodified. These source locations
+and the full MPL text are provided to recipients; the project does not relicense
+covered files or imply that they became Apache-only.
+
+### Operating-system libraries
+
+The pinned distroless Debian 12 base supplies glibc `2.36-9+deb12u14`
+(principally LGPL-2.1-or-later with per-file terms) and GCC runtime libraries
+`12.2.0-14+deb12u1` (GPL with GCC Runtime Library Exception 3.1).
+The startup loader closure includes libc, libm, libstdc++, libgcc_s,
+libdl, librt, libpthread and the ELF loader. These are dynamically linked;
+standard shared-library replacement/rebuilding remains possible.
+[Debian glibc source](https://sources.debian.org/src/glibc/)
+and [Debian GCC source](https://sources.debian.org/src/gcc-12/)
+provide corresponding package sources; original package copyrights and license
+texts remain in the image under `/usr/share/doc` and `/usr/share/common-licenses`.
+The GCC runtime exception is distinct from ordinary GPL-only application code.
+
+Inherited OpenSSL `3.0.20-1~deb12u2` (Apache-2.0) and libgomp (GCC runtime
+exception) are present in the base but outside the server's loader closure.
+The Wyoming implementation does not use TLS. These inherited files are not
+silently presented as project-owned Apache code.
+
+### License material in the image
+
+`/usr/share/licenses/kroko/dependencies` retains the original source/dependency
+license and NOTICE files, inline Darts/ThreadPool notices, ONNX Runtime's complete
+ThirdPartyNotices, and Rust's standard-library copyright inventory and license
+texts. Build-only/other-target notices are preserved conservatively; their
+presence does not mean their code is in the runtime. The C++ convenience API,
+static archives, compiler, Python interpreter and model/audio files are excluded.
+The license collector is [scripts/collect-licenses.sh](../scripts/collect-licenses.sh).
+
+Complete corresponding sources are shipped under
+`/usr/share/licenses/kroko/dependencies/corresponding-source`: glibc 2.36's
+original source, Debian `2.36-9+deb12u14` patches and signed package descriptor,
+Eigen 5.0.1, and ORT's pinned Eigen commit. Each archive is SHA256-verified.
+The glibc source archive checksums are recorded in that Debian descriptor;
+ORT's Eigen archive also matches the upstream manifest's SHA1.
+This avoids relying solely on the continued availability of external links.
+Recipients can retrieve these files with `docker cp` from an image container.
+They are dependency source/compliance material, not ASR models or build outputs.

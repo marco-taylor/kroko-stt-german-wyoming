@@ -9,3 +9,19 @@ Acknowledgements: Kroko / Banafo; k2-fsa sherpa-onnx;
 Wyoming protocol and Home Assistant contributors.
 These acknowledgements imply no affiliation or endorsement.
 No model weights are included.
+
+Native build configuration for the v0.1.0 candidate:
+sherpa-onnx 1.13.8, with TTS and speaker diarization disabled.
+The official Rust shared-library feature is used. eSpeak NG, Piper phonemize
+and ucd-tools are not required by Kroko ASR and are excluded from this build.
+
+Dependencies are NOT relicensed under this project's Apache-2.0 license.
+The Docker build preserves upstream license/notice texts under
+/usr/share/licenses/kroko/dependencies, including ONNX Runtime's complete
+ThirdPartyNotices. Base-image copyright notices remain under /usr/share/doc.
+See docs/dependency-licenses.md for component versions and source locations.
+Corresponding glibc/Eigen sources accompany the image under
+/usr/share/licenses/kroko/dependencies/corresponding-source.
+Original text .data fixtures/ABI metadata inside the hash-verified glibc
+source archive are preserved for compliance. This narrow source-package
+exception does not permit ASR model data or recordings in distribution artifacts.

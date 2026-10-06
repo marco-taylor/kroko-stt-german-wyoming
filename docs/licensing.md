@@ -16,7 +16,7 @@ The locked Rust dependencies' declared licenses are listed in
 [docs/dependency-licenses.md](dependency-licenses.md). Their original license
 texts/copyright notices are available through the exact versioned crate sources.
 A future binary distribution must retain the applicable third-party notices and
-satisfy source availability obligations where required (where applicable).
+satisfy source availability obligations where required.
 
 ## sherpa-onnx and native libraries
 
@@ -27,22 +27,54 @@ and [CMake dependencies](https://github.com/k2-fsa/sherpa-onnx/tree/v1.13.8/cmak
 [ONNX Runtime](https://github.com/microsoft/onnxruntime/blob/v1.28.2/LICENSE)
 uses MIT and has additional third-party notices.
 
-The pinned static archive includes `libespeak-ng.a`, `libpiper_phonemize.a`,
-`libucd.a`, Kaldi/OpenFst, kissfft, SentencePiece and ONNX Runtime libraries.
-The sherpa Rust sys crate's build script explicitly links the supplied static
-libraries, including the TTS-related libraries, even though this application
-only uses ASR. [eSpeak NG COPYING](https://github.com/espeak-ng/espeak-ng/blob/master/COPYING)
-contains GPLv3. Do not assume unused functionality removes GPL obligations:
-we have not established which copyrighted sections survive linking or audited
-all native library notices. Base-image OS libraries also retain their licenses.
+The Dockerfile now builds the pinned sherpa source with TTS and speaker
+diarization disabled and uses the official Rust shared-library feature.
+There is no custom FFI or additional inference runtime. The C API remains the
+normal sherpa API; generic non-TTS ASR/audio code is retained where upstream
+build options do not provide a narrower supported target.
 
-**Binary/image redistribution is blocked pending a complete native dependency
-and linked-artifact license review, inclusion of required notices and any
-corresponding-source provision.** The supplied Dockerfile is a local build/test
-recipe, not a claim that its binaries can be distributed solely under Apache-2.0.
-No binary or image is published by this project preparation.
-[Apache's GPL compatibility guidance](https://www.apache.org/licenses/GPL-compatibility.html)
-explains Apache-2.0/GPLv3 compatibility; compatibility does not waive GPL duties.
+The previous generic static build included eSpeak NG, Piper phonemize and
+ucd-tools despite using only OnlineRecognizer. It is not the release build.
+The new native source build excludes these dependencies. Defined-symbol and
+compiler-input inspection found no eSpeak/Piper/ucd implementation; the disabled
+C API can still export TTS stubs, which do not contain those implementations.
+Removing archives after linking would not have provided the same result.
+
+The runtime contains the sherpa C API shared library and the CPU ONNX Runtime
+shared library. Native feature/FST/tokenization contributors are statically
+included inside the C API; Rust libraries are included in the executables.
+Versions, independent licenses, exact source locations and loader requirements
+are documented in [dependency-licenses.md](dependency-licenses.md).
+ONNX Runtime's packaged source commit matches the official 1.28.2 tag, and its
+complete packaged ThirdPartyNotices matches the pinned upstream source.
+
+The image preserves original dependency notices, including header-embedded
+BSD/zlib helper licenses, Rust's standard-library notices and the full ONNX
+Runtime ThirdPartyNotices. MPL-covered Eigen source is unmodified and its exact
+source locations are supplied in the dependency document included with the
+image. Complete corresponding sources for Eigen and glibc (including the
+matching Debian patches and package descriptor) also accompany the image under
+`/usr/share/licenses/kroko/dependencies/corresponding-source`.
+These checksum-verified dependency sources are license-compliance material,
+not model archives, test recordings, compilers or compiled build intermediates.
+The original glibc source contains text fixtures/ABI metadata with `.data`
+suffixes (including `localplt.data`, `c++-types.data` and `tst-*.data`). They
+remain unchanged inside the separately identified, checksum-verified source
+archive. This exception applies only to the original compliance source package;
+it does not allow `.data` files in application paths, repository contents or
+model packages. ASR model weights, ONNX encoder/decoder/joiner files, model
+archives and speech recordings remain forbidden in images and release assets.
+Debian library copyright/license files remain in the base image.
+The LGPL glibc and GPL-with-runtime-exception GCC libraries remain dynamically
+linked; their notices and source availability are separate from our source
+license. The GCC exception must not be confused with ordinary GPL-only code.
+
+This configuration removes the identified TTS/GPL-only publication blocker.
+It does not make the entire image Apache-only or settle model licenses.
+Preserve the included third-party material and the source-availability links
+when distributing the image; rerun the artifact/license audit on dependency or
+base-image changes. No model redistribution is necessary or authorized by this
+source-code license.
 
 ## Kroko / Banafo models
 

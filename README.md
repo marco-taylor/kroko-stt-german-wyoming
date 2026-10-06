@@ -60,7 +60,7 @@ Home-Assistant-Integrationen erforderlich sind.
 ## Lokaler Docker-Build und Start
 
 Das Dockerfile verwendet festgelegte Versionen bzw. Prüfsummen für Rust 1.90.0,
-sherpa-onnx 1.13.8, das native Archiv und die Basis-Images. Cargo-Abhängigkeiten
+sherpa-onnx 1.13.8, dessen Quellarchiv und die Basis-Images. Cargo-Abhängigkeiten
 sind gesperrt. Für den Build ist Internetzugriff erforderlich, für die eigentliche
 Spracherkennung zur Laufzeit nicht. Das finale Distroless-Image läuft als UID
 65532, enthält keine Modelle, Audiodateien, Python-Laufzeit oder Build-Werkzeuge
@@ -69,6 +69,13 @@ und nutzt ausschließlich die CPU.
 Dieser Weg ist derzeit für lokale Builds vorgesehen. Für die öffentliche
 Weiterverteilung eines fertigen Binaries bzw. Images ist die Lizenzprüfung aus
 [docs/licensing.md](docs/licensing.md) zu beachten.
+
+Der native Build deaktiviert TTS und Sprecherdiarisierung und verwendet das
+offizielle Rust-Feature `shared`. eSpeak NG, Piper-Phonemisierung und ucd-tools
+werden nicht eingebunden. Das Image bewahrt die Lizenztexte der Abhängigkeiten
+und enthält die exakten glibc-/Eigen-Quellen als Lizenz-Compliance-Material unter
+`/usr/share/licenses/kroko/dependencies/corresponding-source`.
+Diese Quellarchive sind keine ASR-Modelle oder kompilierten Build-Artefakte.
 
 ```sh
 ./scripts/build-image.sh
@@ -107,8 +114,12 @@ Für die native Entwicklung wird das passende sherpa-Bibliotheksverzeichnis ben�
 
 ```sh
 SHERPA_ONNX_LIB_DIR=/absolute/path/to/native/lib cargo test --locked
-cargo build --release --locked --bins
+SHERPA_ONNX_LIB_DIR=/absolute/path/to/native/lib cargo build --release --locked --bins
 ```
+
+Verwende die TTS-freien Shared-Bibliotheken aus dem Docker-Build. Beim nativen
+Start muss ihr Verzeichnis außerdem über `LD_LIBRARY_PATH` erreichbar sein;
+im Container ist dies bereits konfiguriert.
 
 ## Protokoll, Streaming und Datenschutz
 
@@ -122,8 +133,9 @@ von den Ereignisgrenzen verarbeitet. Audio wird fortlaufend verarbeitet und
 anschließend verworfen; der Dienst zeichnet keine Audiodaten auf.
 
 Es gibt keine interne VAD. Der Client muss die Anfrage mit `audio-stop`
-abschließen. Eine aktive Inferenz wird serialisiert und die Zahl der Verbindungen
-ist begrenzt. Beim sauberen Beenden kann der Server bis zum Verbindungs-Timeout
+abschließen. Es läuft höchstens eine aktive Inferenz; eine gleichzeitige zweite
+STT-Anfrage erhält einen `busy`-Fehler. Die Zahl der Verbindungen ist begrenzt.
+Beim sauberen Beenden kann der Server bis zum Verbindungs-Timeout
 warten, bevor Worker beendet werden.
 
 Teilergebnisse dienen internen Diagnosezwecken und sind keine proprietären
@@ -139,8 +151,12 @@ WAV-Smoke-Test:
 ```sh
 docker exec kroko-stt-german-wyoming-local /usr/local/bin/wyoming-probe
 # Mit einer separat schreibgeschützt eingebundenen 16-kHz-Mono-PCM16-WAV:
-# wyoming-probe --smoke 127.0.0.1:10321 /test/audio.wav
+# wyoming-probe --smoke 127.0.0.1:10321 /test/01.wav
 ```
+
+Der Smoke-Test prüft die bekannten Regressionssätze in `01.wav` (Licht im
+Wohnzimmer) und `03.wav` (Temperatur auf zweiundzwanzig Grad). Er ist kein
+allgemeines WAV-Transkriptionswerkzeug. Testaufnahmen werden nicht mitgeliefert.
 
 ## Referenzleistung
 

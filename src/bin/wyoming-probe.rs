@@ -1,5 +1,8 @@
 //! Local health check and paced, existing-WAV smoke test. Never records audio.
 #[path = "../server/wyoming.rs"]
+// Framing is shared with the server; its payload handlers are unused by this client.
+// Keep dead-code checks enabled for the server and the rest of this binary.
+#[allow(dead_code)]
 mod wyoming;
 use serde_json::json;
 use std::{io::{BufReader, Write}, net::TcpStream, time::{Duration, Instant}};

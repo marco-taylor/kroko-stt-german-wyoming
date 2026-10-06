@@ -25,11 +25,13 @@ include audio transmission, so they are not throughput RTF measurements.
 Docker's idle memory measurement was approximately 123 MiB; that metric differs
 from process RSS and the historical reference measurements in README.md.
 
-Warnings: the probe shares protocol code and produces harmless unused-code
-warnings. An initial probe before startup completed received connection refused;
+Historical warnings in this run: the probe's shared protocol module produced
+unused-code warnings (now scoped out in that client only). An initial probe
+before startup completed received connection refused;
 Describe and STT passed after the container became healthy. The host shell also
 reports an unavailable C.UTF-8 locale. None was an ASR runtime error.
 
 The clean build downloads pinned dependencies. Base digests, lockfile and native
 archive SHA256 constrain inputs; this is not a claim of bit-identical builds.
-See docs/licensing.md for outstanding native binary and model redistribution review.
+See [docs/licensing.md](licensing.md) for outstanding native binary and model
+redistribution review.
