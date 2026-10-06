@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Container version="2">
+  <Name>Kroko STT German Wyoming</Name>
+  <Repository>ghcr.io/marco-taylor/kroko-stt-german-wyoming:latest</Repository>
+  <Registry>https://github.com/marco-taylor/kroko-stt-german-wyoming/pkgs/container/kroko-stt-german-wyoming</Registry>
+  <Network>bridge</Network>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/marco-taylor/kroko-stt-german-wyoming/issues</Support>
+  <Project>https://github.com/marco-taylor/kroko-stt-german-wyoming</Project>
+  <ReadMe>https://github.com/marco-taylor/kroko-stt-german-wyoming/blob/main/docs/models.md</ReadMe>
+  <TemplateURL>https://raw.githubusercontent.com/marco-taylor/kroko-stt-german-wyoming/main/templates/kroko-stt-german-wyoming.xml</TemplateURL>
+  <Overview>Kroko STT German Wyoming: lokale deutsche Streaming-Spracherkennung fuer Home Assistant mit Rust, sherpa-onnx und Wyoming. Ausschliesslich Deutsch, CPU-only, linux/amd64. Ein Thread und classic sind die empfohlenen N100-Standards.
+
+VOR DER INSTALLATION: Modellanleitung unter ReadMe lesen. Die vier hashgeprueften Dateien encoder.onnx, decoder.onnx, joiner.onnx und tokens.txt muessen im Unterordner classic des gewaehlten Modellverzeichnisses liegen. Kein automatischer Modelldownload. Ohne diese Dateien startet der Dienst nicht; fehlende Dateien oder falsche Pruefsummen werden im Log genannt.
+
+Modelle werden extern bereitgestellt und read-only unter /models eingebunden. Ihre Lizenzen sind unabhaengig vom Apache-2.0-Projektcode; eine freie Weiterverteilung der Classic-Gewichte wird nicht behauptet. Community-64 und Community-128 sind nur manuell vorbereitete Alternativen. Immer nur ein Modell wird geladen; ein Wechsel erfordert Aendern von KROKO_MODEL und Neuerstellen des Containers.
+
+Vor Start einen freien Hostport waehlen. Keine Weboberflaeche, GPU oder Audioaufzeichnung. Wyoming besitzt keine eigene Authentifizierung/TLS; nur im vertrauenswuerdigen LAN verwenden. LOG_LEVEL=info protokolliert finale Transkripte; warn reduziert dies.</Overview>
+  <Category>AI: HomeAutomation:</Category>
+  <ExtraSearchTerms>kroko banafo stt speech-to-text deutsch german streaming home assistant wyoming rust sherpa-onnx</ExtraSearchTerms>
+  <WebUI/>
+  <Icon>https://raw.githubusercontent.com/marco-taylor/kroko-stt-german-wyoming/main/icons/kroko-stt-german-wyoming.png</Icon>
+  <ExtraParams>--user=65532:65532 --read-only --cap-drop=ALL --security-opt=no-new-privileges --restart=unless-stopped</ExtraParams>
+  <Requires>linux/amd64. Vor dem ersten Start das ausgewaehlte Modell anhand der ReadMe extern vorbereiten und SHA256 pruefen. Modellordner muessen fuer UID/GID 65532 lesbar und durchsuchbar sein. Keine Modellgewichte im Image. Hostport darf keinen bestehenden Dienst verdraengen.</Requires>
+  <Config Name="Wyoming-STT-Port" Target="10321" Default="10321" Mode="tcp" Description="Freier Host-TCP-Port fuer Home Assistant. Standard 10321; interner Container-Port bleibt 10321. Bestehende Dienste nicht ersetzen." Type="Port" Display="always" Required="true" Mask="false">10321</Config>
+  <Config Name="Kroko-Modelle (vorher vorbereiten)" Target="/models" Default="/mnt/user/appdata/kroko-stt-german-wyoming/models" Mode="ro" Description="Persistenter uebergeordneter Modellordner, read-only. Fuer classic werden classic/encoder.onnx, classic/decoder.onnx, classic/joiner.onnx und classic/tokens.txt benoetigt. Vor Apply die Modellanleitung unter ReadMe befolgen. Kein automatischer Download." Type="Path" Display="always" Required="true" Mask="false">/mnt/user/appdata/kroko-stt-german-wyoming/models</Config>
+  <Config Name="Kroko-Modell" Target="KROKO_MODEL" Default="classic|community-64|community-128" Mode="" Description="classic ist Standard. Alternativen nur bei manuell vorbereiteten, hashgeprueften Dateien in community-64/ oder community-128/. Nur die Auswahl wird geladen. Wechsel erfordert Neuerstellen, nicht nur docker restart." Type="Variable" Display="always" Required="true" Mask="false">classic</Config>
+  <Config Name="CPU-Threads" Target="NUM_THREADS" Default="1" Mode="" Description="Standard 1, fuer Intel N100 empfohlen. Erlaubt 1 bis 4; keine GPU erforderlich." Type="Variable" Display="always" Required="true" Mask="false">1</Config>
+  <Config Name="Sprache" Target="LANGUAGE" Default="de" Mode="" Description="Ausschliesslich Deutsch. de ist Standard; keine Unterstuetzung weiterer Sprachen." Type="Variable" Display="advanced" Required="true" Mask="false">de</Config>
+  <Config Name="Logstufe" Target="LOG_LEVEL" Default="info|warn|error|debug" Mode="" Description="info protokolliert finale Transkripte, debug zusaetzlich interne Partials. warn oder error reduzieren Sprachinhalte in Logs. Audio wird nicht gespeichert." Type="Variable" Display="advanced" Required="true" Mask="false">info</Config>
+  <Config Name="Zeitzone" Target="TZ" Default="Europe/Berlin" Mode="" Description="Standard Europe/Berlin." Type="Variable" Display="advanced" Required="true" Mask="false">Europe/Berlin</Config>
+  <Config Name="Modellpfad im Container" Target="MODEL_DIR" Default="/models" Mode="" Description="Uebergeordneter Modellpfad. Passend zum read-only Mount auf /models belassen." Type="Variable" Display="advanced" Required="true" Mask="false">/models</Config>
+  <Config Name="Listener im Container" Target="HOST" Default="0.0.0.0" Mode="" Description="Auf 0.0.0.0 belassen, damit Wyoming ueber das Portmapping erreichbar ist." Type="Variable" Display="advanced" Required="true" Mask="false">0.0.0.0</Config>
+  <Config Name="Interner Wyoming-Port" Target="PORT" Default="10321" Mode="" Description="Auf 10321 belassen. Der Hostport wird separat im Portmapping gewaehlt." Type="Variable" Display="advanced" Required="true" Mask="false">10321</Config>
+</Container>

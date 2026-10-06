@@ -52,6 +52,20 @@ Community-Quellrevision: `d45212aeb212dd66083dd22710c9954f40ff8cc1`.
 Quellen und Hinweise zur Bereitstellung der Modelle stehen in
 [docs/models.md](docs/models.md).
 
+Für eine frische Unraid-Installation ist `classic` das empfohlene Standardmodell.
+Die Modellanleitung enthält einen vollständigen Copy-&-Paste-Befehlsblock für
+den manuellen Download der vier Dateien aus der exakt gepinnten Originalquelle,
+ihre SHA256-Prüfung und Leserechte für UID 65532. Diesen Schritt **vor dem ersten
+Containerstart** ausführen; weder Image noch Server laden Modelle automatisch.
+Nutzer müssen die Bedingungen der Originalquelle prüfen und akzeptieren.
+Bei unklaren Nutzungsrechten ist eine Klärung mit dem Rechteinhaber erforderlich;
+eine freie Weiterverteilung der Classic-Gewichte wird nicht behauptet.
+
+`community-64` und `community-128` benötigen separat vorbereitete vollständige,
+hashgeprüfte Modellkomponenten. Eine `.data`-Datei allein genügt nicht; der Server
+extrahiert oder installiert sie nicht automatisch. Alle Modellgewichte bleiben
+außerhalb des Repositories und Docker-Images im persistenten Modellordner.
+
 Zum Wechseln des Modells muss die Umgebungsvariable geändert und der Container
 neu erstellt werden. Ein `docker restart` allein ändert die Umgebung nicht.
 Der Wyoming-Name bleibt `kroko`, sodass für die Modellprofile keine getrennten
